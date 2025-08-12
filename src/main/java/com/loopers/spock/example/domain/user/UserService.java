@@ -2,9 +2,12 @@ package com.loopers.spock.example.domain.user;
 
 import com.loopers.spock.example.common.error.BusinessException;
 import com.loopers.spock.example.common.error.CommonErrorType;
+import com.loopers.spock.example.domain.user.attribute.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +38,16 @@ public class UserService {
         User user = userRepository.findByName(command.getUserName())
                 .orElseThrow(() -> new BusinessException(CommonErrorType.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
-        user.changeEmail(command.getEmail());
+        Email email = command.getEmail();
+        userRepository.findByEmail(email)
+                .stream()
+                .filter(u -> !Objects.equals(u.getId(), user.getId()))
+                .findAny()
+                .ifPresent(u -> {
+                    throw new BusinessException(CommonErrorType.CONFLICT, "이미 등록된 이메일입니다.");
+                });
+
+        user.changeEmail(email);
         userRepository.saveUser(user);
 
         return user;
