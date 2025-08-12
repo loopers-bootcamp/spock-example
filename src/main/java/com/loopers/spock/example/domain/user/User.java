@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Getter
@@ -57,34 +58,47 @@ public class User {
 
     // -------------------------------------------------------------------------------------------------
 
+    @Version
+    private Long version;
+
+    // -------------------------------------------------------------------------------------------------
+
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z\\d]{1,10}$");
 
     @Builder
     private User(String name, Gender gender, LocalDate birthDate, Email email) {
         if (!StringUtils.hasText(name) || !NAME_PATTERN.matcher(name).matches()) {
-            throw new BusinessException(CommonErrorType.INVALID,
-                    "이름은 영문 및 숫자로 10자 이내여야 합니다.");
+            throw new BusinessException(CommonErrorType.INVALID, "이름은 영문 및 숫자로 10자 이내여야 합니다.");
         }
 
         if (gender == null) {
-            throw new BusinessException(CommonErrorType.INVALID,
-                    "올바르지 않은 성별입니다.");
+            throw new BusinessException(CommonErrorType.INVALID, "올바르지 않은 성별입니다.");
         }
 
         if (birthDate == null) {
-            throw new BusinessException(CommonErrorType.INVALID,
-                    "올바르지 않은 생년월일입니다.");
+            throw new BusinessException(CommonErrorType.INVALID, "올바르지 않은 생년월일입니다.");
         }
 
         if (email == null) {
-            throw new BusinessException(CommonErrorType.INVALID,
-                    "올바르지 않은 이메일입니다.");
+            throw new BusinessException(CommonErrorType.INVALID, "올바르지 않은 이메일입니다.");
         }
 
         this.name = name;
         this.gender = gender;
         this.birthDate = birthDate;
         this.email = email;
+    }
+
+    public void changeEmail(Email newEmail) {
+        if (newEmail == null) {
+            throw new BusinessException(CommonErrorType.INVALID, "올바르지 않은 이메일입니다.");
+        }
+
+        if (Objects.equals(this.email, newEmail)) {
+            throw new BusinessException(CommonErrorType.CONFLICT, "기존 이메일과 동일한 이메일입니다.");
+        }
+
+        this.email = newEmail;
     }
 
 }

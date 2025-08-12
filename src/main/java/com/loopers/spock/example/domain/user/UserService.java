@@ -30,4 +30,15 @@ public class UserService {
         return user;
     }
 
+    @Transactional
+    public User changeEmail(UserCommand.ChangeEmail command) {
+        User user = userRepository.findByName(command.getUserName())
+                .orElseThrow(() -> new BusinessException(CommonErrorType.NOT_FOUND, "존재하지 않는 사용자입니다."));
+
+        user.changeEmail(command.getEmail());
+        userRepository.saveUser(user);
+
+        return user;
+    }
+
 }

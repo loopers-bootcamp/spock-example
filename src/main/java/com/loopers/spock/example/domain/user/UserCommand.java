@@ -19,4 +19,14 @@ public final class UserCommand {
         private final Email email;
     }
 
+    // -------------------------------------------------------------------------------------------------
+
+    @Getter
+    @Builder
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class ChangeEmail {
+        private final String userName;
+        private final Email email;
+    }
+
 }
